@@ -57,7 +57,7 @@ class JsonToArrayParser implements ParserInterface
                         $last = $default;
                         break;
                     } else {
-                        throw new ScraperEngineException(printf('Field %s is not exists in the %s', $key, print_r($last, true)));
+                        throw new ScraperEngineException(sprintf('Field %s is not exists in the %s', $key, print_r($last, true)));
                     }
                 }
             }

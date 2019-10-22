@@ -8,6 +8,9 @@
 
 namespace ScraperEngine\Rules;
 
+use ScraperEngine\Logger\DefaultLogger;
+use ScraperEngine\Logger\LoggerInterface;
+
 /**
  * Class BuildRequestsRule
  * @package ScraperEngine\Rules
@@ -30,6 +33,11 @@ abstract class BaseRule implements RuleInterface
     protected $required = array();
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * @param $settings
      * @return void
      */
@@ -41,14 +49,16 @@ abstract class BaseRule implements RuleInterface
     /**
      * PaginatorRequestBuilderRule constructor.
      * @param string $name
-     * @param array  $required
-     * @param array  $settings
+     * @param array $required
+     * @param array $settings
+     * @param LoggerInterface|null $logger
      */
-    public function __construct($name, $required, $settings)
+    public function __construct($name, $required, $settings, LoggerInterface $logger = null)
     {
         $this->name     = $name;
         $this->required = $required;
         $this->settings = $settings;
+        $this->logger   = ($logger) ? $logger : new DefaultLogger();
     }
 
      /**

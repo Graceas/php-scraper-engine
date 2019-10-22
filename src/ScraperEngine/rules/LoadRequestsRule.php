@@ -24,8 +24,19 @@ class LoadRequestsRule extends BaseRule
     private $responses = array();
 
     /**
+     * @var int
+     */
+    private $countOfRequests = 0;
+
+    /**
+     * @var int
+     */
+    private $countOfProcessedRequests = 0;
+
+    /**
      * settings:
      * loader - class implemented LoaderInterface
+     * concurrency - count of parallels requests (window size)
      * @param array $storage
      * @return mixed
      * @throws \ScraperEngine\Exception\ScraperEngineException
@@ -36,13 +47,20 @@ class LoadRequestsRule extends BaseRule
         $loader   = $this->settings['loader'];
         $requests = array();
         $callback = array($this, 'storeResponse');
+
+        $this->countOfRequests = count($storage[$this->required[0]]);
+        $this->logger->addDebug(sprintf('[LoadRequestsRule] Total Requests: %s', $this->countOfRequests));
         /** @var RequestInterface $request */
         foreach ($storage[$this->required[0]] as $request) {
             $requests[] = $request->setCallback($callback)->getRequest();
         }
 
         $loader->setRequests($requests);
-        $loader->execute();
+        $loader->execute((isset($this->settings['concurrency'])) ? $this->settings['concurrency'] : null);
+
+        $this->logger->addDebug(sprintf('[LoadRequestsRule] Traffic In: %s', $loader->getTrafficIn()));
+        $this->logger->addDebug(sprintf('[LoadRequestsRule] Traffic Out: %s', $loader->getTrafficOut()));
+        $this->logger->addDebug(sprintf('[LoadRequestsRule] Count of responses: %s', count($this->responses)));
 
         return $this->responses;
     }
@@ -52,6 +70,9 @@ class LoadRequestsRule extends BaseRule
      */
     public function storeResponse($response)
     {
+        $this->countOfProcessedRequests++;
+        $this->logger->addDebug(sprintf('[LoadRequestsRule][Loaded][%s/%s][status:%s]', $this->countOfProcessedRequests, $this->countOfRequests, print_r($response->getInfo(), true)));
+
         $response = new $this->settings['response_class']($response);
         $this->responses[] = $response;
     }
