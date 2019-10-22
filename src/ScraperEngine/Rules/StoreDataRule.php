@@ -24,8 +24,8 @@ class StoreDataRule extends BaseRule
     {
         /** @var StorageInterface $storageClass */
         $storageClass = $this->settings['storage'];
-
-        foreach ($storage[$this->required[0]] as $item) {
+        $data = $storage[$this->required[0]];
+        foreach ($data as $item) {
             $storageClass->store($item);
         }
 

@@ -51,7 +51,8 @@ class LoadRequestsRule extends BaseRule
         $this->countOfRequests = count($storage[$this->required[0]]);
         $this->logger->addDebug(sprintf('[LoadRequestsRule] Total Requests: %s', $this->countOfRequests));
         /** @var RequestInterface $request */
-        foreach ($storage[$this->required[0]] as $request) {
+        $requestsForLoad = $storage[$this->required[0]];
+        foreach ($requestsForLoad as $request) {
             $requests[] = $request->setCallback($callback)->getRequest();
         }
 

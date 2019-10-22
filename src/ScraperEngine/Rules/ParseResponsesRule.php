@@ -29,7 +29,8 @@ class ParseResponsesRule extends BaseRule
         /** @var ParserInterface $parser */
         $parser = $this->settings['parser'];
         /** @var ResponseInterface $response */
-        foreach ($storage[$this->required[0]] as $response) {
+        $responses = $storage[$this->required[0]];
+        foreach ($responses as $response) {
 
             $parseResults[] = $parser->parse($response, array(
                 'instructions' => $this->settings['instructions'],
