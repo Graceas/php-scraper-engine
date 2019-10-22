@@ -29,7 +29,13 @@ class PaginatorRequestBuilderRule extends BaseRule
         foreach ($categories as $category => $pageLimit) {
             for ($i = $pageLimit['start_page']; $i <= $pageLimit['end_page']; $i++) {
                 $url = str_replace(array('{category}', '{page}'), array($category, $i), $this->settings['base_url']);
-                $requests[] = call_user_func_array($this->settings['create_request_function'], array($url));
+
+                $request = call_user_func_array($this->settings['create_request_function'], array($url));
+                if (is_array($request)) {
+                    $requests = array_merge($requests, $request);
+                } else {
+                    $requests[] = $request;
+                }
             }
         }
 
