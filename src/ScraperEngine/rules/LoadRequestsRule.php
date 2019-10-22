@@ -71,6 +71,7 @@ class LoadRequestsRule extends BaseRule
     public function storeResponse($response)
     {
         $this->countOfProcessedRequests++;
+        $this->logger->addInfo(sprintf('[LoadRequestsRule][Loaded][%s/%s][url:%s]', $this->countOfProcessedRequests, $this->countOfRequests, $response->getRequest()->getUrl()));
         $this->logger->addDebug(sprintf('[LoadRequestsRule][Loaded][%s/%s][status:%s]', $this->countOfProcessedRequests, $this->countOfRequests, print_r($response->getInfo(), true)));
 
         $response = new $this->settings['response_class']($response);
