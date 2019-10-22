@@ -10,7 +10,7 @@ Through composer:
 
     "require": {
         ...
-        "graceas/php-scraper-engine": "v1.0"
+        "graceas/php-scraper-engine": "v0.0.2"
         ...
     }
 
@@ -36,7 +36,25 @@ Usage
                         'end_page'   => 5
                     ),
                 ),
-                'base_url'   => 'https://www.example.com/{category}/?page={page}'
+                'base_url' => 'https://www.example.com/{category}/?page={page}',
+                'create_request_function' => function ($url) {
+                 return (new \ScraperEngine\Loader\Request\SimpleCurlRequestWrapper())
+                     ->setUrl($url)
+                     ->setMethod(SimpleCurlWrapper\SimpleCurlRequest::METHOD_GET)
+                     ->setHeaders(array(
+                         'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+                         'accept-language: en-GB,en-US;q=0.9,en;q=0.8,ru;q=0.7',
+                         'cache-control: no-cache',
+                         'cookie: dfp_segment_test=47; dfp_segment_test_v3=17; dfp_segment_test_v4=62; dfp_segment_test_oa=2',
+                         'pragma: no-cache',
+                         'referer: https://www.example.com/',
+                         'sec-fetch-mode: navigate',
+                         'sec-fetch-site: same-origin',
+                         'sec-fetch-user: ?1',
+                         'upgrade-insecure-requests: 1',
+                         'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36',
+                     ));
+                }
             )
         ),
         // create requests and load
@@ -47,26 +65,7 @@ Usage
             ),
             array( // settings
                 'loader' => new \ScraperEngine\Loader\SimpleCurlLoaderWrapper(),
-                'response_class' => '\ScraperEngine\Loader\Response\SimpleCurlResponseWrapper',
-                'create_request_function' => function ($url, $callback) {
-                    return (new \ScraperEngine\Loader\Request\SimpleCurlRequestWrapper())
-                        ->setUrl($url)
-                        ->setMethod(SimpleCurlWrapper\SimpleCurlRequest::METHOD_GET)
-                        ->setHeaders(array(
-                            'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-                            'accept-language: en-GB,en-US;q=0.9,en;q=0.8,ru;q=0.7',
-                            'cache-control: no-cache',
-                            'cookie: dfp_segment_test=47; dfp_segment_test_v3=17; dfp_segment_test_v4=62; dfp_segment_test_oa=2',
-                            'pragma: no-cache',
-                            'referer: https://www.example.com/',
-                            'sec-fetch-mode: navigate',
-                            'sec-fetch-site: same-origin',
-                            'sec-fetch-user: ?1',
-                            'upgrade-insecure-requests: 1',
-                            'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36',
-                        ))
-                        ->setCallback($callback);
-                }
+                'response_class' => '\ScraperEngine\Loader\Response\SimpleCurlResponseWrapper'
             )
         ),
         // parse responses content
