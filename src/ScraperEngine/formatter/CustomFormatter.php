@@ -10,12 +10,13 @@ namespace ScraperEngine\Formatter;
 
 
 /**
- * Class ArrayToJsonFormatter
+ * Class CustomFormatter
  * @package ScraperEngine\Formatter
  */
 class CustomFormatter implements FormatterInterface
 {
     const OPTION_CALLBACK = 'option_callback';
+
     /**
      * @var array
      */
@@ -24,7 +25,7 @@ class CustomFormatter implements FormatterInterface
     );
 
     /**
-     * ArrayToJsonFormatter constructor.
+     * CustomFormatter constructor.
      * @param array $settings
      */
     public function __construct($settings = array())
