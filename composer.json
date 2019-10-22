@@ -6,7 +6,7 @@
     "require": {
         "php": ">=5.6",
         "graceas/php-simple-logger": "v1.1",
-        "graceas/php-simple-curl-wrapper": "v1.4",
+        "graceas/php-simple-curl-wrapper": "v1.4.1",
         "graceas/php-html-parser": "v1.0"
     },
     "license": "MIT",
