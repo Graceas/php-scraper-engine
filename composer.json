@@ -5,9 +5,9 @@
     "type": "library",
     "require": {
         "php": ">=5.5.9",
-        "graceas/php-simple-logger": "v1.1.3",
-        "graceas/php-simple-curl-wrapper": "v1.4.3",
-        "graceas/php-html-parser": "v1.1"
+        "graceas/php-simple-logger": "v1.1.4",
+        "graceas/php-simple-curl-wrapper": "v1.4.4",
+        "graceas/php-html-parser": "v1.2"
     },
     "license": "MIT",
     "authors": [
