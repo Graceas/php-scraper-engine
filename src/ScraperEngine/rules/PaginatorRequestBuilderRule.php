@@ -33,6 +33,8 @@ class PaginatorRequestBuilderRule extends BaseRule
             }
         }
 
+        $requests = array_filter($requests);
+
         return $requests;
     }
 }
