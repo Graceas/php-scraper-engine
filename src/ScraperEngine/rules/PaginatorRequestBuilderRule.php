@@ -24,8 +24,9 @@ class PaginatorRequestBuilderRule extends BaseRule
     public function execute($storage)
     {
         $requests = array();
+        $categories = (isset($this->settings['categories'])) ? $this->settings['categories'] : $storage[$this->required[0]];
 
-        foreach ($this->settings['categories'] as $category => $pageLimit) {
+        foreach ($categories as $category => $pageLimit) {
             for ($i = $pageLimit['start_page']; $i <= $pageLimit['end_page']; $i++) {
                 $url = str_replace(array('{category}', '{page}'), array($category, $i), $this->settings['base_url']);
                 $requests[] = call_user_func_array($this->settings['create_request_function'], array($url));
