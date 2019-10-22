@@ -23,14 +23,15 @@ class PaginatorRequestBuilderRule extends BaseRule
      */
     public function execute($storage)
     {
-        $urls = array();
+        $requests = array();
 
         foreach ($this->settings['categories'] as $category => $pageLimit) {
             for ($i = $pageLimit['start_page']; $i <= $pageLimit['end_page']; $i++) {
-                $urls[] = str_replace(array('{category}', '{page}'), array($category, $i), $this->settings['base_url']);
+                $url = str_replace(array('{category}', '{page}'), array($category, $i), $this->settings['base_url']);
+                $requests[] = call_user_func_array($this->settings['create_request_function'], array($url));
             }
         }
 
-        return $urls;
+        return $requests;
     }
 }

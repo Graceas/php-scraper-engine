@@ -9,6 +9,7 @@
 namespace ScraperEngine\Rules;
 
 use ScraperEngine\Loader\LoaderInterface;
+use ScraperEngine\Loader\Request\RequestInterface;
 use ScraperEngine\Loader\Response\ResponseInterface;
 
 /**
@@ -25,7 +26,6 @@ class LoadRequestsRule extends BaseRule
     /**
      * settings:
      * loader - class implemented LoaderInterface
-     * create_request_function - create request function
      * @param array $storage
      * @return mixed
      * @throws \ScraperEngine\Exception\ScraperEngineException
@@ -36,8 +36,9 @@ class LoadRequestsRule extends BaseRule
         $loader   = $this->settings['loader'];
         $requests = array();
         $callback = array($this, 'storeResponse');
-        foreach ($storage[$this->required[0]] as $url) {
-            $requests[] = call_user_func_array($this->settings['create_request_function'], array($url, $callback))->getRequest();
+        /** @var RequestInterface $request */
+        foreach ($storage[$this->required[0]] as $request) {
+            $requests[] = $request->setCallback($callback)->getRequest();
         }
 
         $loader->setRequests($requests);
