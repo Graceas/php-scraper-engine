@@ -35,6 +35,8 @@ class ParseResponsesRule extends BaseRule
             $parseResults[] = $parser->parse($response, array(
                 'instructions' => $this->settings['instructions'],
             ));
+
+            $response = null;
         }
 
         return $parseResults;
