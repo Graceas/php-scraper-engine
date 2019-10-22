@@ -10,7 +10,7 @@ Through composer:
 
     "require": {
         ...
-        "graceas/php-scraper-engine": "v0.0.3"
+        "graceas/php-scraper-engine": "v0.0.4"
         ...
     }
 
