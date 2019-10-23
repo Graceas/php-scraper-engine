@@ -88,5 +88,5 @@ interface RequestInterface
     /**
      * @return mixed
      */
-    public function &getRequest();
+    public function getRequest();
 }

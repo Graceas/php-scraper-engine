@@ -155,7 +155,7 @@ class SimpleCurlRequestWrapper implements RequestInterface
     /**
      * @return SimpleCurlRequest
      */
-    public function &getRequest()
+    public function getRequest()
     {
         return $this->request;
     }

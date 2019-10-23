@@ -49,7 +49,7 @@ interface LoaderInterface
     /**
      * @return RequestInterface[]
      */
-    public function &getRequests();
+    public function getRequests();
 
     /**
      * @return int

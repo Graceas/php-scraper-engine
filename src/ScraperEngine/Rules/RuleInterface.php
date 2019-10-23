@@ -34,5 +34,5 @@ interface RuleInterface
      * @param array $storage
      * @return mixed
      */
-    public function execute($storage);
+    public function execute(&$storage);
 }

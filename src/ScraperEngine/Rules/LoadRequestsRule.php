@@ -41,7 +41,7 @@ class LoadRequestsRule extends BaseRule
      * @return mixed
      * @throws \ScraperEngine\Exception\ScraperEngineException
      */
-    public function execute($storage)
+    public function execute(&$storage)
     {
         /** @var LoaderInterface $loader */
         $loader   = $this->settings['loader'];
@@ -63,6 +63,11 @@ class LoadRequestsRule extends BaseRule
         $this->logger->addDebug(sprintf('[LoadRequestsRule] Traffic Out: %s', $loader->getTrafficOut()));
         $this->logger->addDebug(sprintf('[LoadRequestsRule] Count of responses: %s', count($this->responses)));
 
+        $loader   = null;
+        $requests = null;
+        $requestsForLoad = null;
+        $callback = null;
+
         return $this->responses;
     }
 
@@ -72,10 +77,14 @@ class LoadRequestsRule extends BaseRule
     public function storeResponse($response)
     {
         $this->countOfProcessedRequests++;
-        $this->logger->addInfo(sprintf('[LoadRequestsRule][Loaded][%s/%s][url:%s]', $this->countOfProcessedRequests, $this->countOfRequests, $response->getRequest()->getUrl()));
-        $this->logger->addDebug(sprintf('[LoadRequestsRule][Loaded][%s/%s][status:%s]', $this->countOfProcessedRequests, $this->countOfRequests, print_r($response->getInfo(), true)));
+        $info = $response->getInfo();
+        $this->logger->addInfo(sprintf('[LoadRequestsRule][Loaded][%s/%s][url:%s]', $this->countOfProcessedRequests, $this->countOfRequests, $info['requested_url']));
+        $this->logger->addDebug(sprintf('[LoadRequestsRule][Loaded][%s/%s][status:%s]', $this->countOfProcessedRequests, $this->countOfRequests, print_r($info, true)));
 
         $response = new $this->settings['response_class']($response);
         $this->responses[] = $response;
+
+        $response = null;
+        $info     = null;
     }
 }

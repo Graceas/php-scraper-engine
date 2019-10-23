@@ -20,7 +20,7 @@ class StoreDataRule extends BaseRule
      * @param array $storage
      * @return mixed
      */
-    public function execute($storage)
+    public function execute(&$storage)
     {
         /** @var StorageInterface $storageClass */
         $storageClass = $this->settings['storage'];

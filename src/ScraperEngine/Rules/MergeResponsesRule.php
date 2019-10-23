@@ -20,7 +20,7 @@ class MergeResponsesRule extends BaseRule
      * @param array $storage
      * @return mixed
      */
-    public function execute($storage)
+    public function execute(&$storage)
     {
         /** @var MergerInterface $merger */
         $merger = $this->settings['merger'];

@@ -42,19 +42,28 @@ class HtmlToArrayParser implements ParserInterface
     {
         $sourceUrl = 'unknown';
         if ($content instanceof ResponseInterface) {
-            $sourceUrl = $content->getRequest()->getUrl();
-            $content = $content->getBody();
+            $response = $content;
+            $sourceUrl = $response->getInfo()['requested_url'];
+            $content   = $response->getBody();
+            $response  = null;
         }
 
         try {
+            $values = $this->parser->getValues($content, $settings['instructions']);
+            $content  = null;
+            $settings = null;
+
             return array_merge(
-                $this->parser->getValues($content, $settings['instructions']),
+                $values,
                 array(
                     '_source_url'  => $sourceUrl,
                     '_loaded_date' => time()
                 )
             );
         } catch (\Exception $e) {
+            $content  = null;
+            $settings = null;
+
             throw new ScraperEngineException($e->getMessage(), $e->getCode(), $e);
         }
     }

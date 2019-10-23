@@ -82,14 +82,18 @@ class SimpleCurlLoaderWrapper implements LoaderInterface
     /**
      * @return RequestInterface[]
      */
-    public function &getRequests()
+    public function getRequests()
     {
         $requests = $this->loader->getRequests();
         $wrappedRequests = array();
 
         foreach ($requests as $request) {
             $wrappedRequests[] = $request;
+
+            $request = null;
         }
+
+        $requests = null;
 
         return $wrappedRequests;
     }

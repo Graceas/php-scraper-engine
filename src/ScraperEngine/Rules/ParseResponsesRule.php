@@ -23,21 +23,31 @@ class ParseResponsesRule extends BaseRule
      * @param array $storage
      * @return mixed
      */
-    public function execute($storage)
+    public function execute(&$storage)
     {
         $parseResults = array();
         /** @var ParserInterface $parser */
         $parser = $this->settings['parser'];
         /** @var ResponseInterface $response */
-        $responses = $storage[$this->required[0]];
-        foreach ($responses as $response) {
+
+        $tempPath  = isset($this->settings['temp_path']) ? $this->settings['temp_path'] : sys_get_temp_dir().'/';
+        $responses = &$storage[$this->required[0]];
+        foreach ($responses as &$response) {
 
             $parseResults[] = $parser->parse($response, array(
                 'instructions' => $this->settings['instructions'],
+                'temp_path'    => $tempPath
             ));
 
+            $filepath = null;
             $response = null;
         }
+
+
+        $responses = null;
+        $storage[$this->required[0]] = null;
+        $parser   = null;
+        $tempPath = null;
 
         return $parseResults;
     }

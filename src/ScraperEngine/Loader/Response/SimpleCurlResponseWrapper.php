@@ -8,9 +8,6 @@
 
 namespace ScraperEngine\Loader\Response;
 
-use ScraperEngine\Loader\Request\RequestInterface;
-use ScraperEngine\Loader\Request\SimpleCurlRequestWrapper;
-use SimpleCurlWrapper\SimpleCurlRequest;
 use SimpleCurlWrapper\SimpleCurlResponse;
 
 /**
@@ -20,17 +17,32 @@ use SimpleCurlWrapper\SimpleCurlResponse;
 class SimpleCurlResponseWrapper implements ResponseInterface
 {
     /**
-     * @var SimpleCurlResponse
+     * @var string
      */
-    private $response;
+    private $responsePath;
 
     /**
      * SimpleCurlRequestWrapper constructor.
      * @param SimpleCurlResponse|null $response
      */
-    public function __construct(SimpleCurlResponse $response = null)
+    public function __construct(SimpleCurlResponse &$response)
     {
-        $this->response = ($response) ? $response : new SimpleCurlResponse("", "", array(), new SimpleCurlRequest());
+        $pid = getmypid();
+        $loaderTempDir = sys_get_temp_dir().'/_loader_/';
+        $tempPath = $loaderTempDir.$pid.'/';
+
+        if (!file_exists($loaderTempDir)) {
+            mkdir($loaderTempDir);
+        }
+
+        if (!file_exists($tempPath)) {
+            mkdir($tempPath);
+        }
+
+        $responseSerialized = serialize($response);
+        $responseHash       = sha1($responseSerialized.microtime(true).microtime(false).rand(0, 999999));
+        $this->responsePath = $tempPath.'_resp_'.$responseHash;
+        file_put_contents($this->responsePath, $responseSerialized);
     }
 
     /**
@@ -38,7 +50,7 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function &getHeaders()
     {
-        return $this->response->getHeaders();
+        return unserialize(file_get_contents($this->responsePath))->getHeaders();
     }
 
     /**
@@ -46,7 +58,7 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function getHeadersAsArray()
     {
-        return $this->response->getHeadersAsArray();
+        return unserialize(file_get_contents($this->responsePath))->getHeadersAsArray();
     }
 
     /**
@@ -54,15 +66,15 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function &getBody()
     {
-        return $this->response->getBody();
+        return unserialize(file_get_contents($this->responsePath))->getBody();
     }
 
     /**
      * @return string
      */
-    public function &getBodyAsJson()
+    public function getBodyAsJson()
     {
-        return $this->response->getBodyAsJson();
+        return unserialize(file_get_contents($this->responsePath))->getBodyAsJson();
     }
 
     /**
@@ -70,16 +82,19 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function &getInfo()
     {
-        return $this->response->getInfo();
+        return unserialize(file_get_contents($this->responsePath))->getInfo();
     }
 
     /**
-     * @return RequestInterface
+     * @return mixed
      */
     public function &getRequest()
     {
-        $request = new SimpleCurlRequestWrapper($this->response->getRequest());
+        return unserialize(file_get_contents($this->responsePath))->getRequest();
+    }
 
-        return $request;
+    public function __destruct()
+    {
+        @unlink($this->responsePath);
     }
 }

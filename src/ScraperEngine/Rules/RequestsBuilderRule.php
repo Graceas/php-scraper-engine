@@ -20,7 +20,7 @@ class RequestsBuilderRule extends BaseRule
      * @param array $storage
      * @return mixed
      */
-    public function execute($storage)
+    public function execute(&$storage)
     {
         $requests = array();
         $parameters = (isset($this->settings['parameters'])) ? $this->settings['parameters'] : $storage[$this->required[0]];

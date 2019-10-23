@@ -11,6 +11,7 @@ namespace ScraperEngine;
 use ScraperEngine\Exception\ScraperEngineException;
 use ScraperEngine\Logger\DefaultLogger;
 use ScraperEngine\Logger\LoggerInterface;
+use ScraperEngine\Rules\ParseResponsesRule;
 use ScraperEngine\Rules\RuleInterface;
 
 /**
@@ -35,14 +36,21 @@ class Scraper
     private $logger = null;
 
     /**
+     * @var string
+     */
+    private $tempPath = '';
+
+    /**
      * Scraper constructor.
      * @param array $rules
      * @param LoggerInterface|null $logger
      */
-    public function __construct(array $rules, LoggerInterface $logger = null)
+    public function __construct(array $rules = array(), LoggerInterface $logger = null)
     {
         $this->rules  = $rules;
         $this->logger = ($logger) ? $logger : new DefaultLogger();
+
+        $this->prepareTempDir();
     }
 
     /**
@@ -50,8 +58,14 @@ class Scraper
      */
     public function execute()
     {
+        gc_disable();
+
         /** @var RuleInterface $rule */
-        foreach ($this->rules as $rule) {
+        foreach ($this->rules as &$rule) {
+            if (!$rule) {
+                continue;
+            }
+
             $this->logger->addInfo(sprintf('Execute %s rule - started', $rule->getName()));
             $storage = array();
             foreach ($rule->getRequired() as $required) {
@@ -62,8 +76,63 @@ class Scraper
             }
             $this->storage[$rule->getName()] = $rule->execute($storage);
 
+            if ($rule instanceof ParseResponsesRule) {
+                // clear responses
+                if (isset($this->storage[$rule->getRequired()[0]]) && is_array($this->storage[$rule->getRequired()[0]])) {
+                    foreach ($this->storage[$rule->getRequired()[0]] as &$response) {
+                        $response = null;
+                    }
+                }
+
+//                $this->storage[$rule->getRequired()[0]] = null;
+//                $this->rules[$rule->getRequired()[0]]   = null;
+            }
+
             $this->logger->addInfo(sprintf('Execute %s rule - finished', $rule->getName()));
-            unset($storage);
+            $rule    = null;
+            $storage = null;
         }
+    }
+
+    /**
+     * Destructor
+     */
+    public function __destruct()
+    {
+        @rmdir($this->tempPath);
+    }
+
+    /**
+     * Prepare temp dir.
+     */
+    private function prepareTempDir()
+    {
+        $pid = getmypid();
+        $loaderTempDir = sys_get_temp_dir().'/_loader_/';
+        $this->tempPath = $loaderTempDir.$pid.'/';
+        if (!file_exists($loaderTempDir)) {
+            mkdir($loaderTempDir);
+        }
+        if (!file_exists($this->tempPath)) {
+            mkdir($this->tempPath);
+        }
+
+        register_shutdown_function(array($this, '__destruct'));
+    }
+
+    /**
+     * @return string
+     */
+    public function getTempPath()
+    {
+        return $this->tempPath;
+    }
+
+    /**
+     * @param array $rules
+     */
+    public function setRules(&$rules)
+    {
+        $this->rules = $rules;
     }
 }

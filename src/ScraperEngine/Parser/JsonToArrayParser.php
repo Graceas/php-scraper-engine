@@ -10,6 +10,7 @@ namespace ScraperEngine\Parser;
 
 use ScraperEngine\Exception\ScraperEngineException;
 use ScraperEngine\Loader\Response\ResponseInterface;
+use ScraperEngine\Result\Result;
 
 
 /**
@@ -21,19 +22,26 @@ class JsonToArrayParser implements ParserInterface
     /**
      * @param string $content
      * @param array  $settings [instructions => '']
-     * @return array
+     * @return mixed
      * @throws ScraperEngineException
      */
     public function parse($content, $settings = array())
     {
         $sourceUrl = 'unknown';
         if ($content instanceof ResponseInterface) {
-            $sourceUrl = $content->getRequest()->getUrl();
-            $content = $content->getBody();
+            $response  = $content;
+
+            $content   = $response->getBody();
+            $sourceUrl = $response->getInfo()['requested_url'];
+
+            $response = null;
+            $request  = null;
         }
 
+        $data = array();
         if (is_string($content)) {
-            $content = json_decode($content, true);
+            $data    = json_decode($content, true);
+            $content = null;
         }
 
         $result = array();
@@ -48,7 +56,7 @@ class JsonToArrayParser implements ParserInterface
             @list($instruction, $default) = explode('||', $instruction, 2);
             $keys = explode('->', $instruction);
 
-            $last = $content;
+            $last = $data;
             foreach ($keys as $key) {
                 if (isset($last[$key])) {
                     $last = $last[$key];
@@ -63,12 +71,32 @@ class JsonToArrayParser implements ParserInterface
             }
 
             $result[$instructionKey] = $last;
+
+            $last           = null;
+            $keys           = null;
+            $instructionKey = null;
+            $instruction    = null;
+            $default        = null;
         }
 
-        $result = array_merge($result, array(
+        $instructions = null;
+        $data         = null;
+        $settings     = null;
+
+        $merged       = array_merge($result, array(
             '_source_url'  => $sourceUrl,
             '_loaded_date' => time()
         ));
+
+        $sourceUrl = null;
+        $result    = null;
+
+        $tempPath  = isset($settings['temp_path']) ? $settings['temp_path'] : sys_get_temp_dir().'/';
+        $filepath  = $tempPath.'_res_'.sha1(microtime(true).microtime().rand(0, 999999));
+        $result    = new Result($filepath, $merged);
+        $tempPath  = null;
+        $merged    = null;
+        $filepath  = null;
 
         return $result;
     }

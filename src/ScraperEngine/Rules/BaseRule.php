@@ -65,7 +65,7 @@ abstract class BaseRule implements RuleInterface
      * @param array $storage
      * @return mixed
      */
-    abstract public function execute($storage);
+    abstract public function execute(&$storage);
 
     /**
      * @return string

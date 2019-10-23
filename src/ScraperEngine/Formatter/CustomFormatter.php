@@ -43,6 +43,6 @@ class CustomFormatter implements FormatterInterface
             return $input;
         }
 
-        return call_user_func_array($this->settings[self::OPTION_CALLBACK], array($input));
+        return call_user_func_array($this->settings[self::OPTION_CALLBACK], array(&$input));
     }
 }

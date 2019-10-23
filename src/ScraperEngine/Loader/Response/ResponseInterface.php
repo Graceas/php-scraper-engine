@@ -31,9 +31,9 @@ interface ResponseInterface
     public function &getBody();
 
     /**
-     * @return string
+     * @return array
      */
-    public function &getBodyAsJson();
+    public function getBodyAsJson();
 
     /**
      * @return array

@@ -21,7 +21,7 @@ class PaginatorRequestBuilderRule extends BaseRule
      * @param array $storage
      * @return mixed
      */
-    public function execute($storage)
+    public function execute(&$storage)
     {
         $requests = array();
         $categories = (isset($this->settings['categories'])) ? $this->settings['categories'] : $storage[$this->required[0]];
