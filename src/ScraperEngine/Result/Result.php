@@ -24,7 +24,7 @@ class Result
      * @param string $filepath
      * @param mixed  $content
      */
-    public function __construct($filepath, $content)
+    public function __construct($filepath, &$content)
     {
         $this->filepath = $filepath;
 

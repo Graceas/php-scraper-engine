@@ -29,20 +29,11 @@ class JsonToArrayParser implements ParserInterface
     {
         $sourceUrl = 'unknown';
         if ($content instanceof ResponseInterface) {
-            $response  = $content;
-
-            $content   = $response->getBody();
-            $sourceUrl = $response->getInfo()['requested_url'];
-
-            $response = null;
-            $request  = null;
+            $sourceUrl = $content->getInfo()['requested_url'];
+            $content   = $content->getBody();
         }
 
-        $data = array();
-        if (is_string($content)) {
-            $data    = json_decode($content, true);
-            $content = null;
-        }
+        $data = (is_string($content)) ? json_decode($content, true) : $content;
 
         $result = array();
         $instructions = explode(PHP_EOL, $settings['instructions']);
@@ -97,6 +88,7 @@ class JsonToArrayParser implements ParserInterface
         $tempPath  = null;
         $merged    = null;
         $filepath  = null;
+        $content   = null;
 
         return $result;
     }
