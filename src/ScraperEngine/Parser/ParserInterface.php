@@ -19,5 +19,5 @@ interface ParserInterface
      * @param array $settings
      * @return mixed
      */
-    public function parse($content, $settings = array());
+    public function &parse(&$content, $settings = array());
 }

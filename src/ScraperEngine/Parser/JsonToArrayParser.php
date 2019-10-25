@@ -9,9 +9,6 @@
 namespace ScraperEngine\Parser;
 
 use ScraperEngine\Exception\ScraperEngineException;
-use ScraperEngine\Loader\Response\ResponseInterface;
-use ScraperEngine\Result\Result;
-
 
 /**
  * Class JsonToArrayParser
@@ -25,18 +22,15 @@ class JsonToArrayParser implements ParserInterface
      * @return mixed
      * @throws ScraperEngineException
      */
-    public function parse($content, $settings = array())
+    public function &parse(&$content, $settings = array())
     {
-        $sourceUrl = 'unknown';
-        if ($content instanceof ResponseInterface) {
-            $sourceUrl = $content->getInfo()['requested_url'];
-            $content   = $content->getBody();
-        }
+        $data = json_decode($content, true);
 
-        $data = (is_string($content)) ? json_decode($content, true) : $content;
+        $content = null;
+        unset($content);
 
         $result = array();
-        $instructions = explode(PHP_EOL, $settings['instructions']);
+        $instructions = $settings['instructions'];
 
         foreach ($instructions as $instruction) {
             if (strpos($instruction, ':->') === false) {
@@ -50,7 +44,7 @@ class JsonToArrayParser implements ParserInterface
             $last = $data;
             foreach ($keys as $key) {
                 if (isset($last[$key])) {
-                    $last = $last[$key];
+                    $last = &$last[$key];
                 } else {
                     if ($default != null) {
                         $last = $default;
@@ -68,27 +62,14 @@ class JsonToArrayParser implements ParserInterface
             $instructionKey = null;
             $instruction    = null;
             $default        = null;
+
+            unset($last, $keys, $instructionKey, $instruction, $default);
         }
 
-        $instructions = null;
-        $data         = null;
-        $settings     = null;
-
-        $merged       = array_merge($result, array(
-            '_source_url'  => $sourceUrl,
-            '_loaded_date' => time()
-        ));
-
-        $sourceUrl = null;
-        $result    = null;
-
-        $tempPath  = isset($settings['temp_path']) ? $settings['temp_path'] : sys_get_temp_dir().'/';
-        $filepath  = $tempPath.'_res_'.sha1(microtime(true).microtime().rand(0, 999999));
-        $result    = new Result($filepath, $merged);
-        $tempPath  = null;
-        $merged    = null;
-        $filepath  = null;
-        $content   = null;
+        $instructions  = null;
+        $data          = null;
+        $settings      = null;
+        unset($instructions, $data, $settings);
 
         return $result;
     }
