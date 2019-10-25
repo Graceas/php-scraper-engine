@@ -12,6 +12,7 @@ use ScraperEngine\Exception\ScraperEngineException;
 use ScraperEngine\Logger\DefaultLogger;
 use ScraperEngine\Logger\LoggerInterface;
 use ScraperEngine\Rules\ParseResponsesRule;
+use ScraperEngine\Rules\ClearRule;
 use ScraperEngine\Rules\RuleInterface;
 
 /**
@@ -38,19 +39,35 @@ class Scraper
     /**
      * @var string
      */
-    private $tempPath = '';
+    public static $tempPath = '';
+
+    /**
+     * @var string
+     */
+    protected $tempPrefix = '';
 
     /**
      * Scraper constructor.
-     * @param array $rules
+     * @param array                $rules
      * @param LoggerInterface|null $logger
+     * @param string               $tempPath
+     * @param string               $tempPrefix
+     * @throws ScraperEngineException
      */
-    public function __construct(array $rules = array(), LoggerInterface $logger = null)
+    public function __construct(array $rules = array(), LoggerInterface $logger = null, $tempPath = null, $tempPrefix = '')
     {
-        $this->rules  = $rules;
-        $this->logger = ($logger) ? $logger : new DefaultLogger();
+        $this->rules      = $rules;
+        $this->logger     = ($logger) ? $logger : new DefaultLogger();
+        $this->tempPrefix = $tempPrefix;
 
-        $this->prepareTempDir();
+        if (!$tempPath) {
+            $this->prepareTempDir();
+        } else {
+            if (!file_exists($tempPath)) {
+                throw new ScraperEngineException(sprintf('Temp path %s not exists', $tempPath));
+            }
+            static::$tempPath = $tempPath;
+        }
     }
 
     /**
@@ -84,8 +101,17 @@ class Scraper
                     }
                 }
 
-//                $this->storage[$rule->getRequired()[0]] = null;
-//                $this->rules[$rule->getRequired()[0]]   = null;
+                $this->rules[$rule->getRequired()[0]]   = null;
+            }
+
+            if ($rule instanceof ClearRule) {
+                foreach ($rule->getRequired() as $required) {
+                    $this->storage[$required] = null;
+
+                    unset($this->storage[$required]);
+                }
+
+                gc_collect_cycles();
             }
 
             $this->logger->addInfo(sprintf('Execute %s rule - finished', $rule->getName()));
@@ -99,7 +125,7 @@ class Scraper
      */
     public function __destruct()
     {
-        @rmdir($this->tempPath);
+        @rmdir(static::$tempPath);
     }
 
     /**
@@ -107,14 +133,14 @@ class Scraper
      */
     private function prepareTempDir()
     {
-        $pid = getmypid();
+        $pid = $this->tempPrefix.''.getmypid();
         $loaderTempDir = sys_get_temp_dir().'/_loader_/';
-        $this->tempPath = $loaderTempDir.$pid.'/';
+        static::$tempPath = $loaderTempDir.$pid.'/';
         if (!file_exists($loaderTempDir)) {
             mkdir($loaderTempDir);
         }
-        if (!file_exists($this->tempPath)) {
-            mkdir($this->tempPath);
+        if (!file_exists(static::$tempPath)) {
+            mkdir(static::$tempPath);
         }
 
         register_shutdown_function(array($this, '__destruct'));
@@ -125,7 +151,7 @@ class Scraper
      */
     public function getTempPath()
     {
-        return $this->tempPath;
+        return static::$tempPath;
     }
 
     /**
@@ -134,5 +160,21 @@ class Scraper
     public function setRules(&$rules)
     {
         $this->rules = $rules;
+    }
+
+    /**
+     * @param array $storage
+     */
+    public function setStorage(&$storage)
+    {
+        $this->storage = $storage;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
     }
 }

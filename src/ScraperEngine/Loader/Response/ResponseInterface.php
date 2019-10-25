@@ -18,6 +18,16 @@ interface ResponseInterface
     /**
      * @return string
      */
+    public function getRequestedUrl();
+
+    /**
+     * @return string
+     */
+    public function getResponsePath();
+
+    /**
+     * @return string
+     */
     public function &getHeaders();
 
     /**

@@ -38,6 +38,11 @@ abstract class BaseRule implements RuleInterface
     protected $logger;
 
     /**
+     * @var mixed
+     */
+    protected $output;
+
+    /**
      * @param $settings
      * @return void
      */
@@ -52,13 +57,15 @@ abstract class BaseRule implements RuleInterface
      * @param array $required
      * @param array $settings
      * @param LoggerInterface|null $logger
+     * @param null $output
      */
-    public function __construct($name, $required, $settings, LoggerInterface $logger = null)
+    public function __construct($name, $required, $settings, LoggerInterface $logger = null, &$output = null)
     {
         $this->name     = $name;
         $this->required = $required;
         $this->settings = $settings;
         $this->logger   = ($logger) ? $logger : new DefaultLogger();
+        $this->output   = &$output;
     }
 
      /**

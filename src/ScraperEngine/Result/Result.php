@@ -8,6 +8,8 @@
 
 namespace ScraperEngine\Result;
 
+use ScraperEngine\Helper\FileHelper;
+
 /**
  * Class Result
  * @package ScraperEngine\Result
@@ -28,10 +30,14 @@ class Result
     {
         $this->filepath = $filepath;
 
-        file_put_contents($this->filepath, serialize($content));
+        $serializedContent = serialize($content);
+        FileHelper::writeFile($this->filepath, $serializedContent);
 
-        $content  = null;
-        $filepath = null;
+        $content           = null;
+        $filepath          = null;
+        $serializedContent = null;
+
+        unset($content, $filepath, $serializedContent);
     }
 
     /**
@@ -39,7 +45,7 @@ class Result
      */
     public function get()
     {
-        return unserialize(file_get_contents($this->filepath));
+        return unserialize(FileHelper::readFile($this->filepath));
     }
 
     /**

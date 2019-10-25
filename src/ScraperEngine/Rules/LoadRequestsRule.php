@@ -52,6 +52,7 @@ class LoadRequestsRule extends BaseRule
         $this->logger->addDebug(sprintf('[LoadRequestsRule] Total Requests: %s', $this->countOfRequests));
         /** @var RequestInterface $request */
         $requestsForLoad = $storage[$this->required[0]];
+
         foreach ($requestsForLoad as $request) {
             $requests[] = $request->setCallback($callback)->getRequest();
         }
@@ -81,10 +82,12 @@ class LoadRequestsRule extends BaseRule
         $this->logger->addInfo(sprintf('[LoadRequestsRule][Loaded][%s/%s][url:%s]', $this->countOfProcessedRequests, $this->countOfRequests, $info['requested_url']));
         $this->logger->addDebug(sprintf('[LoadRequestsRule][Loaded][%s/%s][status:%s]', $this->countOfProcessedRequests, $this->countOfRequests, print_r($info, true)));
 
-        $response = new $this->settings['response_class']($response);
+        $baseResponse      = &$response;
+        $response          = new $this->settings['response_class']($baseResponse);
         $this->responses[] = $response;
 
-        $response = null;
-        $info     = null;
+        $response     = null;
+        $baseResponse = null;
+        $info         = null;
     }
 }

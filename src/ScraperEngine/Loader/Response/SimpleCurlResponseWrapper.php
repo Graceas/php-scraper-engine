@@ -8,6 +8,8 @@
 
 namespace ScraperEngine\Loader\Response;
 
+use ScraperEngine\Helper\FileHelper;
+use ScraperEngine\Scraper;
 use SimpleCurlWrapper\SimpleCurlResponse;
 
 /**
@@ -22,27 +24,26 @@ class SimpleCurlResponseWrapper implements ResponseInterface
     private $responsePath;
 
     /**
+     * @var string
+     */
+    private $requestedUrl = '';
+
+    /**
      * SimpleCurlRequestWrapper constructor.
      * @param SimpleCurlResponse|null $response
      */
     public function __construct(SimpleCurlResponse &$response)
     {
-        $pid = getmypid();
-        $loaderTempDir = sys_get_temp_dir().'/_loader_/';
-        $tempPath = $loaderTempDir.$pid.'/';
+        $this->requestedUrl = $response->getRequest()->getUrl();
+        $responseHash       = sha1(rand(0, 999999).microtime(true).microtime(false).rand(0, 999999));
+        $this->responsePath = Scraper::$tempPath.'_resp_'.$responseHash;
 
-        if (!file_exists($loaderTempDir)) {
-            mkdir($loaderTempDir);
-        }
+        FileHelper::writeFile($this->responsePath, serialize($response));
 
-        if (!file_exists($tempPath)) {
-            mkdir($tempPath);
-        }
+        $response           = null;
+        $responseHash       = null;
 
-        $responseSerialized = serialize($response);
-        $responseHash       = sha1($responseSerialized.microtime(true).microtime(false).rand(0, 999999));
-        $this->responsePath = $tempPath.'_resp_'.$responseHash;
-        file_put_contents($this->responsePath, $responseSerialized);
+        unset($response, $responseHash);
     }
 
     /**
@@ -50,7 +51,23 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function &getHeaders()
     {
-        return unserialize(file_get_contents($this->responsePath))->getHeaders();
+        return unserialize(FileHelper::readFile($this->responsePath))->getHeaders();
+    }
+
+    /**
+     * @return string
+     */
+    public function getRequestedUrl()
+    {
+        return $this->requestedUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getResponsePath()
+    {
+        return $this->responsePath;
     }
 
     /**
@@ -58,7 +75,7 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function getHeadersAsArray()
     {
-        return unserialize(file_get_contents($this->responsePath))->getHeadersAsArray();
+        return unserialize(FileHelper::readFile($this->responsePath))->getHeadersAsArray();
     }
 
     /**
@@ -66,7 +83,7 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function &getBody()
     {
-        return unserialize(file_get_contents($this->responsePath))->getBody();
+        return unserialize(FileHelper::readFile($this->responsePath))->getBody();
     }
 
     /**
@@ -74,7 +91,7 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function getBodyAsJson()
     {
-        return unserialize(file_get_contents($this->responsePath))->getBodyAsJson();
+        return unserialize(FileHelper::readFile($this->responsePath))->getBodyAsJson();
     }
 
     /**
@@ -82,7 +99,7 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function &getInfo()
     {
-        return unserialize(file_get_contents($this->responsePath))->getInfo();
+        return unserialize(FileHelper::readFile($this->responsePath))->getInfo();
     }
 
     /**
@@ -90,9 +107,12 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function &getRequest()
     {
-        return unserialize(file_get_contents($this->responsePath))->getRequest();
+        return unserialize(FileHelper::readFile($this->responsePath))->getRequest();
     }
 
+    /**
+     * Destructor
+     */
     public function __destruct()
     {
         @unlink($this->responsePath);
