@@ -26,6 +26,10 @@ class RequestsBuilderRule extends BaseRule
         $parameters = (isset($this->settings['parameters'])) ? $this->settings['parameters'] : $storage[$this->required[0]];
 
         foreach ($parameters as $parameter) {
+            if (isset($this->required[1])) {
+                $parameter = array_merge($parameter, $storage[$this->required[1]]);
+            }
+
             $request = call_user_func_array($this->settings['create_request_function'], array($parameter));
             if (is_array($request)) {
                 $requests = array_merge($requests, $request);
