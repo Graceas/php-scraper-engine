@@ -25,10 +25,13 @@ class PaginatorRequestBuilderRule extends BaseRule
     {
         $requests = array();
         $categories = (isset($this->settings['categories'])) ? $this->settings['categories'] : $storage[$this->required[0]];
+        if (!isset($this->settings['page_function'])) {
+            $this->settings['page_function'] = function ($page) { return $page; };
+        }
 
         foreach ($categories as $category => $pageLimit) {
             for ($i = $pageLimit['start_page']; $i <= $pageLimit['end_page']; $i++) {
-                $url = str_replace(array('{category}', '{page}'), array($category, $i), $this->settings['base_url']);
+                $url = str_replace(array('{category}', '{page}'), array($category, call_user_func_array($this->settings['page_function'], array($i))), $this->settings['base_url']);
 
                 $request = call_user_func_array($this->settings['create_request_function'], array($url));
                 if (is_array($request)) {
