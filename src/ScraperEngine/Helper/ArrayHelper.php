@@ -15,6 +15,11 @@ namespace ScraperEngine\Helper;
 class ArrayHelper
 {
     /**
+     * $m = [['a', 1], ['b', 2], ['c', 3]]
+     * $r = getValueByFirstKey($m, 'b', null)
+     * > $r = 2
+     * $r = getValueByFirstKey($m, 'g', null)
+     * > $r = null
      * @param array  $values
      * @param string $keyName
      * @param mixed  $default
@@ -35,5 +40,33 @@ class ArrayHelper
         }
 
         return $sliced[0][1];
+    }
+
+    /**
+     * $array = ['a' => ['b' => 1, 'c' => 2]]
+     * $path  = ['a', 'b']
+     * $r = getValueByKeys($array, $path)
+     * > $r = 1
+     * @param array $array
+     * @param array $path
+     * @param mixed $default
+     * @return null
+     */
+    public static function getValueByKeys(&$array, $path, $default = null) {
+        $target = &$array;
+
+        foreach($path as $key) {
+            if (!$key) {
+                return $default;
+            }
+
+            if (array_key_exists($key, $target)) {
+                $target = &$target[$key];
+            } else {
+                return $default;
+            }
+        }
+
+        return $target;
     }
 }
