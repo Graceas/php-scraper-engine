@@ -115,6 +115,8 @@ class SimpleCurlResponseWrapper implements ResponseInterface
      */
     public function __destruct()
     {
-        @unlink($this->responsePath);
+        if (file_exists($this->responsePath)) {
+            unlink($this->responsePath);
+        }
     }
 }
