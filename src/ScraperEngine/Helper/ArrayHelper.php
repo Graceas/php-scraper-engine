@@ -56,7 +56,7 @@ class ArrayHelper
         $target = &$array;
 
         foreach($path as $key) {
-            if (!$key) {
+            if (!$key || !is_array($target)) {
                 return $default;
             }
 
