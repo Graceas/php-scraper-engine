@@ -125,7 +125,7 @@ class Scraper
      */
     public function __destruct()
     {
-        @rmdir(static::$tempPath);
+        system('rm -rf '.escapeshellarg(static::$tempPath), $retVal);
     }
 
     /**
