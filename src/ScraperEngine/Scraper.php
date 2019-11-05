@@ -32,6 +32,11 @@ class Scraper
     private $storage = array();
 
     /**
+     * @var array mixed
+     */
+    private $settings = array();
+
+    /**
      * @var LoggerInterface|null
      */
     private $logger = null;
@@ -48,25 +53,29 @@ class Scraper
 
     /**
      * Scraper constructor.
+     * @param array                $settings
      * @param array                $rules
      * @param LoggerInterface|null $logger
-     * @param string               $tempPath
-     * @param string               $tempPrefix
      * @throws ScraperEngineException
      */
-    public function __construct(array $rules = array(), LoggerInterface $logger = null, $tempPath = null, $tempPrefix = '')
+    public function __construct($settings = array(), array $rules = array(), LoggerInterface $logger = null)
     {
+        $this->settings   = $settings;
         $this->rules      = $rules;
         $this->logger     = ($logger) ? $logger : new DefaultLogger();
-        $this->tempPrefix = $tempPrefix;
+        $this->tempPrefix = isset($settings['tempPrefix']) ? $settings['tempPrefix'] : '';
 
-        if (!$tempPath) {
+        if (isset($settings['strict-errors']) && $settings['strict-errors']) {
+            $this->setErrorHandler();
+        }
+
+        if (!isset($settings['tempPath'])) {
             $this->prepareTempDir();
         } else {
-            if (!file_exists($tempPath)) {
-                throw new ScraperEngineException(sprintf('Temp path %s not exists', $tempPath));
+            if (!file_exists($settings['tempPath'])) {
+                throw new ScraperEngineException(sprintf('Temp path %s not exists', $settings['tempPath']));
             }
-            static::$tempPath = $tempPath;
+            static::$tempPath = $settings['tempPath'];
         }
     }
 
@@ -91,7 +100,30 @@ class Scraper
                 }
                 $storage[$required] = $this->storage[$required];
             }
+
+            // add default settings
+            $settings = $rule->getSettings();
+            if (!$settings) {
+                $settings = array();
+            }
+
+            if (!isset($settings['loader']) && isset($this->settings['loader'])) {
+                $class = $this->settings['loader']['class'];
+                $settings['loader'] = new $class;
+            }
+            if (!isset($settings['response_class']) && isset($this->settings['response'])) {
+                $settings['response_class'] = $this->settings['response']['class'];
+            }
+            if (!isset($settings['request_class']) && isset($this->settings['request'])) {
+                $settings['request_class'] = $this->settings['request']['class'];
+            }
+
+            $settings['variables'] = isset($settings['variables']) ? array_merge($this->settings['variables'], $settings['variables']) : $this->settings['variables'];
+
+            $rule->configure($settings);
             $this->storage[$rule->getName()] = $rule->execute($storage);
+            $settings = null;
+            unset($settings);
 
             if ($rule instanceof ParseResponsesRule) {
                 // clear responses
@@ -144,6 +176,30 @@ class Scraper
         }
 
         register_shutdown_function(array($this, '__destruct'));
+    }
+
+    /**
+     * Set error handler
+     */
+    private function setErrorHandler()
+    {
+        set_error_handler(array($this, 'errHandle'));
+    }
+
+    /**
+     * @param int    $errNo
+     * @param string $errStr
+     * @param string $errFile
+     * @param string $errLine
+     * @throws ScraperEngineException
+     */
+    public function errHandle($errNo, $errStr, $errFile, $errLine) {
+        $msg = "$errStr in $errFile on line $errLine";
+        if ($errNo == E_NOTICE || $errNo == E_WARNING) {
+            throw new ScraperEngineException($msg, $errNo);
+        } else {
+            echo $msg;
+        }
     }
 
     /**

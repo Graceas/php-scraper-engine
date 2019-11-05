@@ -33,6 +33,7 @@ class JsonToArrayParser implements ParserInterface
     public function &parse(&$content, $settings = array())
     {
         $data = json_decode($content, true);
+
         $content = null;
         unset($content);
 

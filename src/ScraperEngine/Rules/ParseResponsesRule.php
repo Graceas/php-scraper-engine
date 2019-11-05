@@ -35,7 +35,11 @@ class ParseResponsesRule extends BaseRule
         $this->logger->addInfo('>>>>test0');
         $responses = &$storage[$this->required[0]];
 
-        $instructions = explode(PHP_EOL, $this->settings['instructions']);
+        $instructions = $this->settings['instructions'];
+        if (!is_array($instructions)) {
+            $instructions = explode(PHP_EOL, $this->settings['instructions']);
+        }
+
         $settings     = array(
             'instructions' => $instructions,
         );

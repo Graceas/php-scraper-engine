@@ -49,10 +49,20 @@ class Result
     }
 
     /**
+     * @return mixed
+     */
+    public function __toString()
+    {
+        return $this->get();
+    }
+
+    /**
      * Destructor.
      */
     public function __destruct()
     {
-        @unlink($this->filepath);
+        if (file_exists($this->filepath)) {
+            @unlink($this->filepath);
+        }
     }
 }

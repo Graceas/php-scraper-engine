@@ -35,4 +35,9 @@ interface RuleInterface
      * @return mixed
      */
     public function execute(&$storage);
+
+    /**
+     * @return array
+     */
+    public function getSettings();
 }

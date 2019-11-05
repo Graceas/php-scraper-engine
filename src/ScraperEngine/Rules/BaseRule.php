@@ -43,12 +43,15 @@ abstract class BaseRule implements RuleInterface
     protected $output;
 
     /**
-     * @param $settings
+     * @param array $settings
      * @return void
      */
     public function configure($settings)
     {
         $this->settings = $settings;
+
+        $settings = null;
+        unset($settings);
     }
 
     /**
@@ -88,5 +91,13 @@ abstract class BaseRule implements RuleInterface
     public function getRequired()
     {
         return $this->required;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSettings()
+    {
+        return $this->settings;
     }
 }
