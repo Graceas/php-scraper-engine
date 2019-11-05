@@ -63,19 +63,19 @@ class Scraper
         $this->settings   = $settings;
         $this->rules      = $rules;
         $this->logger     = ($logger) ? $logger : new DefaultLogger();
-        $this->tempPrefix = isset($settings['tempPrefix']) ? $settings['tempPrefix'] : '';
+        $this->tempPrefix = isset($settings['temp-prefix']) ? $settings['temp-prefix'] : '';
 
         if (isset($settings['strict-errors']) && $settings['strict-errors']) {
             $this->setErrorHandler();
         }
 
-        if (!isset($settings['tempPath'])) {
+        if (!isset($settings['temp-path'])) {
             $this->prepareTempDir();
         } else {
-            if (!file_exists($settings['tempPath'])) {
-                throw new ScraperEngineException(sprintf('Temp path %s not exists', $settings['tempPath']));
+            if (!file_exists($settings['temp-path'])) {
+                throw new ScraperEngineException(sprintf('Temp path %s not exists', $settings['temp-path']));
             }
-            static::$tempPath = $settings['tempPath'];
+            static::$tempPath = $settings['temp-path'];
         }
     }
 
