@@ -195,6 +195,11 @@ class Scraper
      */
     public function errHandle($errNo, $errStr, $errFile, $errLine) {
         $msg = "$errStr in $errFile on line $errLine";
+
+        if (error_reporting() == 0) {
+            return;
+        }
+
         if ($errNo == E_NOTICE || $errNo == E_WARNING) {
             throw new ScraperEngineException($msg, $errNo);
         } else {

@@ -26,9 +26,9 @@ class HtmlToArrayParser implements ParserInterface
      * HtmlToJsonParser constructor.
      * @param HtmlParser|null $parser
      */
-    public function __construct(HtmlParser $parser = null)
+    public function __construct()
     {
-        $this->parser = ($parser) ? $parser : new HtmlParser();
+        $this->parser = new HtmlParser();
     }
 
     /**
@@ -40,7 +40,7 @@ class HtmlToArrayParser implements ParserInterface
     public function &parse(&$content, $settings = array())
     {
         try {
-            $values = $this->parser->getValues($content, $settings['instructions']);
+            $values = $this->parser->getValues($content, (is_array($settings['instructions'])) ? implode(PHP_EOL, $settings['instructions']) : $settings['instructions']);
             $content  = null;
             $settings = null;
 
